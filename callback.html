@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>ChannelDeck sign-in</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1>ChannelDeck</h1>
+<p class="lede" id="msg">Returning you to ChannelDeck…</p>
+</main>
+<script>
+  // Facebook and Instagram only redirect to https pages. This page hands the sign-in result straight back
+  // to the ChannelDeck app running on this same computer (127.0.0.1), on the port it put in `state`.
+  // It never sends anything anywhere else and stores nothing.
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var state = q.get("state") || "";
+    var port = Number(state.split(".")[0]);
+    if (!(port >= 1024 && port <= 65535)) {
+      document.getElementById("msg").textContent = "This link isn't from a ChannelDeck sign-in.";
+      return;
+    }
+    var out = new URLSearchParams();
+    ["code", "state", "error", "error_reason", "error_description"].forEach(function (k) {
+      if (q.has(k)) out.set(k, q.get(k).replace(/#_$/, ""));
+    });
+    location.replace("http://127.0.0.1:" + port + "/callback/?" + out.toString());
+  })();
+</script>
+</body>
+</html>
